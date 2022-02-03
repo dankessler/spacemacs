@@ -865,15 +865,17 @@ a new object."
                (eq (car location) 'recipe)
                (eq (plist-get (cdr location) :fetcher) 'local))
           (cond
-           (layer (let ((path (expand-file-name
-                               (format "%s%s"
-                                       (configuration-layer/get-layer-local-dir
-                                        layer-name)
-                                       pkg-name-str))))
-                    (cfgl-package-set-property
-                     obj :location `(recipe :fetcher file :path ,path))))
-           ((eq 'dotfile layer-name) nil))
-        (cfgl-package-set-property obj :location location)))
+           (layer (let* ((path (expand-file-name
+                                (format "%s%s"
+                                        (configuration-layer/get-layer-local-dir
+                                         layer-name)
+                                        pkg-name-str)))
+                         (recipe-plist (plist-put (plist-put (cdr location)
+                                                             :fetcher 'file)
+                                                  :path path))
+                         (location (setcdr location recipe-plist)))))
+           ((eq 'dotfile layer-name) nil)))
+      (cfgl-package-set-property obj :location location))
     ;; cannot override protected packages
     (unless copyp
       ;; a bootstrap package is protected
