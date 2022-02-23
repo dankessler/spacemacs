@@ -1553,20 +1553,20 @@ Pass `user-layer' on to `configuration-layer/make-layer'."
     (dolist (layer-name configuration-layer--layers-dependencies)
       (configuration-layer/declare-layer layer-name))
     ;; loop over the user's layer specs again to enforce customizations
-    (unless configuration-layer-exclude-all-layers
-      (dolist (layer-specs (remove nil layers-specs))
-        (let* ((layer-name (if (listp layer-specs)
-                               (car layer-specs)
-                             layer-specs))
-               (layer (configuration-layer/get-layer layer-name)))
-          (if layer
-              (let ((layer-path (oref layer :dir)))
-                (unless (string-match-p "+distributions" layer-path)
-                  (configuration-layer/declare-layer layer-specs)))
-            (configuration-layer//warning
-             "Unknown layer %s declared in dotfile." layer-name))))
-      (setq configuration-layer--used-layers
-            (reverse configuration-layer--used-layers)))
+    ;; (unless configuration-layer-exclude-all-layers
+    ;;   (dolist (layer-specs (remove nil layers-specs))
+    ;;     (let* ((layer-name (if (listp layer-specs)
+    ;;                            (car layer-specs)
+    ;;                          layer-specs))
+    ;;            (layer (configuration-layer/get-layer layer-name)))
+    ;;       (if layer
+    ;;           (let ((layer-path (oref layer :dir)))
+    ;;             (unless (string-match-p "+distributions" layer-path)
+    ;;               (configuration-layer/declare-layer layer-specs)))
+    ;;         (configuration-layer//warning
+    ;;          "Unknown layer %s declared in dotfile." layer-name))))
+    ;;   (setq configuration-layer--used-layers
+    ;;         (reverse configuration-layer--used-layers)))
     ;; distribution and bootstrap layers are always first
     (let ((distribution (if configuration-layer-force-distribution
                             configuration-layer-force-distribution
