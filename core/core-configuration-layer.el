@@ -199,7 +199,18 @@ subdirectory of ROOT is used."
                 :initform nil
                 :type boolean
                 :documentation
-                "Boolean to track whether layers.el has been loaded."))
+                "Boolean to track whether layers.el has been loaded.")
+   (user-layer :initarg :user-layer
+               :initform nil
+               :type boolean
+               :documentation
+               "Boolean to track whether this layer was specifically
+               added/configured by the user (in
+               `dotspacemacs-configuration-layers') or if it was added by some
+               other mechanism (e.g., as a dependency).
+               `configuration-layer/make-layer' will avoid clobbering
+               user-specified customization if this field is non-nil.")
+   )
   "A configuration layer.")
 
 (cl-defmethod cfgl-layer-owned-packages ((layer cfgl-layer) &optional props)
@@ -757,10 +768,13 @@ layer directory."
      ;; no package selections or all package selected
      (t 'all))))
 
-(defun configuration-layer/make-layer (layer-specs &optional obj usedp dir)
+(defun configuration-layer/make-layer (layer-specs &optional obj usedp dir user-layer)
   "Return a `cfgl-layer' object based on LAYER-SPECS.
-If OBJ is non nil then copy LAYER-SPECS properties into OBJ, otherwise create
-a new object.
+If OBJ is non nil then (conditionally) copy LAYER-SPECS properties into OBJ,
+otherwise create a new object.
+`user-layer' can either be passed as an explicit argument or if nil read from `obj'.
+If resulting value of `user-layer is non-nil, then just use obj as-is (the
+configuration in a user-configured layer should not be overwritten).
 DIR is the directory where the layer is, if it is nil then search in the indexed
 layers for the path.
 If USEDP or `configuration-layer--load-packages-files' is non-nil then the
@@ -769,7 +783,8 @@ If USEDP or `configuration-layer--load-packages-files' is non-nil then the
          (obj (if obj obj (cfgl-layer (symbol-name layer-name)
                                       :name layer-name)))
          (packages (oref obj :packages))
-         (dir (or dir (oref obj :dir))))
+         (dir (or dir (oref obj :dir)))
+         (user-layer (if user-layer user-layer (oref obj :user-layer))))
     (if (or (null dir)
             (and dir (not (file-exists-p dir))))
         (configuration-layer//warning
@@ -801,16 +816,17 @@ If USEDP or `configuration-layer--load-packages-files' is non-nil then the
                                      layer-specs packages)
                                   ;; default value
                                   'all)))
-        (oset obj :dir dir)
-        (when usedp
-          (oset obj :disabled-for disabled)
-          (oset obj :enabled-for enabled)
-          (oset obj :variables variables)
-          (unless (eq 'unspecified shadow)
-            (oset obj :can-shadow shadow)))
-        (when packages
-          (oset obj :packages packages)
-          (oset obj :selected-packages selected-packages))
+        (unless user-layer              ; don't touch anything if user-layer is non-nil
+          (oset obj :dir dir)
+          (when usedp
+            (oset obj :disabled-for disabled)
+            (oset obj :enabled-for enabled)
+            (oset obj :variables variables)
+            (unless (eq 'unspecified shadow)
+              (oset obj :can-shadow shadow)))
+          (when packages
+            (oset obj :packages packages)
+            (oset obj :selected-packages selected-packages)))
         obj))))
 
 (defun configuration-layer/make-package (pkg-specs layer-name &optional obj)
@@ -1483,11 +1499,12 @@ discovery."
   (dolist (specs layers-specs)
     (configuration-layer/declare-layer specs skip-layer-deps)))
 
-(defun configuration-layer/declare-layer (layer-specs &optional skip-layer-deps)
+(defun configuration-layer/declare-layer (layer-specs &optional skip-layer-deps user-layer)
   "Declare a single layer with spec LAYER-SPECS.
 Set the variable `configuration-layer--declared-layers-usedp' to control
 whether the declared layer is an used one or not.
-If `SKIP-LAYER-DEPS' is non nil then skip loading of layer dependenciesl"
+If `SKIP-LAYER-DEPS' is non nil then skip loading of layer dependencies.
+Pass `user-layer' on to `configuration-layer/make-layer'."
   (let* ((layer-name (if (listp layer-specs) (car layer-specs) layer-specs))
          (layer (configuration-layer/get-layer layer-name))
          (usedp configuration-layer--declared-layers-usedp))
@@ -1495,7 +1512,9 @@ If `SKIP-LAYER-DEPS' is non nil then skip loading of layer dependenciesl"
         (let ((obj (configuration-layer/make-layer
                     layer-specs
                     (configuration-layer/get-layer layer-name)
-                    usedp)))
+                    usedp
+                    nil
+                    user-layer)))
           (configuration-layer//add-layer obj usedp)
           (configuration-layer//set-layer-variables obj)
           (when (and (not skip-layer-deps)
@@ -1524,7 +1543,7 @@ If `SKIP-LAYER-DEPS' is non nil then skip loading of layer dependenciesl"
           (if layer
               (let ((layer-path (oref layer :dir)))
                 (unless (string-match-p "+distributions" layer-path)
-                  (configuration-layer/declare-layer layer-specs)))
+                  (configuration-layer/declare-layer layer-specs nil t)))
             (configuration-layer//warning
              "Unknown layer %s declared in dotfile." layer-name))))
       (setq configuration-layer--used-layers
