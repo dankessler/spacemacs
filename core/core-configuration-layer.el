@@ -768,7 +768,7 @@ layer directory."
      ;; no package selections or all package selected
      (t 'all))))
 
-(defun configuration-layer/make-layer (layer-specs &optional obj usedp dir user-layer)
+(defun configuration-layer/make-layer (layer-specs &optional obj usedp dir)
   "Return a `cfgl-layer' object based on LAYER-SPECS.
 If OBJ is non nil then (conditionally) copy LAYER-SPECS properties into OBJ,
 otherwise create a new object.
@@ -780,11 +780,12 @@ layers for the path.
 If USEDP or `configuration-layer--load-packages-files' is non-nil then the
 `packages.el' file of the layer is loaded."
   (let* ((layer-name (if (listp layer-specs) (car layer-specs) layer-specs))
+         (user-layer-specs (listp layer-specs))
          (obj (if obj obj (cfgl-layer (symbol-name layer-name)
                                       :name layer-name)))
+         (user-layer (oref obj :user-layer))
          (packages (oref obj :packages))
-         (dir (or dir (oref obj :dir)))
-         (user-layer (if user-layer user-layer (oref obj :user-layer))))
+         (dir (or dir (oref obj :dir))))
     (if (or (null dir)
             (and dir (not (file-exists-p dir))))
         (configuration-layer//warning
@@ -816,18 +817,20 @@ If USEDP or `configuration-layer--load-packages-files' is non-nil then the
                                      layer-specs packages)
                                   ;; default value
                                   'all)))
-        (unless user-layer              ; don't touch anything if user-layer is non-nil
-          (oset obj :dir dir)
-          (when usedp
+
+        (oset obj :dir dir)
+        (when usedp
+          (unless user-layer          ; don't touch settings if obj was user-built
+            (oset obj :user-layer user-layer-specs)
             (oset obj :disabled-for disabled)
             (oset obj :enabled-for enabled)
             (oset obj :variables variables)
             (unless (eq 'unspecified shadow)
-              (oset obj :can-shadow shadow)))
-          (when packages
-            (oset obj :packages packages)
-            (oset obj :selected-packages selected-packages)))
-        obj))))
+              (oset obj :can-shadow shadow))))
+        (when packages
+          (oset obj :packages packages)
+          (oset obj :selected-packages selected-packages)))
+      obj)))
 
 (defun configuration-layer/make-package (pkg-specs layer-name &optional obj)
   "Return a `cfgl-package' object based on PKG-SPECS.
