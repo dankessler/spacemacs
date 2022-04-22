@@ -31,6 +31,7 @@
     (company-auctex :requires company)
     (company-reftex :requires company)
     counsel-gtags
+    helm-bibtex
     evil-matchit
     flycheck
     flyspell
@@ -273,3 +274,7 @@
 (defun latex/init-company-reftex ()
   (use-package company-reftex
     :defer t))
+
+(defun latex/post-init-helm-bibtex ()
+  (spacemacs/set-leader-keys-for-major-mode 'latex-mode "hb" 'helm-bibtex-with-local-bibliography)
+  (setq biblio-bibtex-use-autokey t))
