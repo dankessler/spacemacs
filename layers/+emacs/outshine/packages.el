@@ -23,7 +23,9 @@
 
 (defconst outshine-packages
   '(outshine
-    outorg))
+    outorg
+    navi-mode
+    (helm-navi :toggle (configuration-layer/layer-used-p 'helm))))
 
 (defun outshine/init-outshine ()
   (use-package outshine
@@ -79,5 +81,13 @@ Navigate headings^^^^      Move subtrees^^^^               Other^^
     (spacemacs/set-leader-keys
       "aOc"  'outorg-copy-edits-and-exit
       "aOe"  'outorg-edit-as-org)))
+
+(defun outshine/init-navi-mode ()
+  (use-package navi-mode
+    :bind ("M-s n" . navi-search-and-switch)))
+
+(defun outshine/init-helm-navi ()
+  (use-package helm-navi
+    :defer t))
 
 ;;; packages.el ends here
