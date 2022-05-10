@@ -86,7 +86,9 @@ Navigate headings^^^^      Move subtrees^^^^               Other^^
 
 (defun outshine/init-navi-mode ()
   (use-package navi-mode
-    :bind ("M-s n" . navi-search-and-switch)))
+    :bind ("M-s n" . navi-search-and-switch)
+    :config
+    (evil-set-initial-state 'navi-mode 'emacs)))
 
 (defun outshine/init-helm-navi ()
   (use-package helm-navi
