@@ -30,9 +30,9 @@
     :defer t
     :mode (("\\.pdf\\'" . pdf-view-mode))
     :init
+    (pdf-loader-install)
     (spacemacs//pdf-tools-setup-transient-state)
     :config
-    (pdf-tools-install)
 
     (spacemacs/declare-prefix-for-mode 'pdf-view-mode "ma" "annotations")
     (spacemacs/declare-prefix-for-mode 'pdf-view-mode "mf" "fit")
