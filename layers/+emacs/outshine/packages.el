@@ -30,7 +30,6 @@
     :defer t
     :init
     (add-hook 'prog-mode-hook          'outline-minor-mode)
-    (add-hook 'outline-minor-mode-hook 'outshine-mode)
     :config
     (spacemacs|hide-lighter outline-minor-mode)
     (spacemacs|hide-lighter outshine-mode)
