@@ -28,8 +28,6 @@
 (defun outshine/init-outshine ()
   (use-package outshine
     :defer t
-    :init
-    (add-hook 'prog-mode-hook          'outline-minor-mode)
     :config
     (spacemacs|hide-lighter outline-minor-mode)
     (spacemacs|hide-lighter outshine-mode)
