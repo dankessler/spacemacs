@@ -37,6 +37,7 @@
   - [[#org-modern-support][Org-modern support]]
   - [[#org-appear-support][Org-appear support]]
   - [[#transclusion-support][Transclusion support]]
+  - [[#org-latex-preview-support][Org-latex-preview support]]
   - [[#verb-support][Verb support]]
   - [[#asciidoc-support][AsciiDoc support]]
   - [[#spacemacs-layout-integration][Spacemacs layout integration]]
@@ -595,6 +596,20 @@ via a file link or an ID lin, set the =org-enable-transclusion-support= to =t=:
   (setq-default dotspacemacs-configuration-layers
    '((org :variables org-enable-transclusion-support t)))
 #+END_SRC
+
+** Org-latex-preview support
+To install the development version of org-mode with org-latex-preview support,
+set the variable =org-enable-latex-preview-support= to =t=.
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default dotspacemacs-configuration-layers
+   '((org :variables org-enable-latex-preview-support t)))
+#+END_SRC
+
+Spacemacs automatically handles the build process (version file and autoloads generation)
+when this feature is enabled.
+
+See [[https://abode.karthinks.com/org-latex-preview/][org-latex-preview]] documentation for more information.
 
 ** Verb support
 To install [[https://github.com/federicotdn/verb][Verb]], an HTTP client based on Org mode, set the

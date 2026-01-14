@@ -22,7 +22,7 @@
 
 
 (defconst org-packages
-  '(
+  `(
     company
     company-emoji
     emoji-cheat-sheet-plus
@@ -33,7 +33,12 @@
     htmlize
     ;; ob, org, org-agenda and org-contacts are installed by `org-contrib'
     (ob :location built-in)
-    (org :location elpa)
+    ,(if (bound-and-true-p org-enable-latex-preview-support)
+         '(org :location (recipe :fetcher git
+                                 :url "https://git.tecosaur.net/tec/org-mode.git"
+                                 :branch "dev"
+                                 :files ("lisp/*.el" "etc" "doc")))
+       '(org :location elpa))
     (org-agenda :location built-in)
     (org-alert  :toggle org-enable-notifications)
     (org-contacts :toggle org-enable-org-contacts-support)
@@ -127,6 +132,36 @@
     :defer t
     :commands (orgtbl-mode)
     :init
+    (when (and (bound-and-true-p org-enable-latex-preview-support)
+               (require 'lisp-mnt nil t)
+               (locate-library "org"))
+      (let* ((org-dir (file-name-directory (locate-library "org")))
+             (org-version-file (expand-file-name "org-version.el" org-dir))
+             (org-loaddefs-file (expand-file-name "org-loaddefs.el" org-dir)))
+        (when (and (file-writable-p org-dir)
+                   (not (file-exists-p org-version-file)))
+          (let* ((version (with-temp-buffer
+                            (insert-file-contents (expand-file-name "org.el" org-dir))
+                            (lm-header "version")))
+                 (git-version (if (file-exists-p (expand-file-name ".git" org-dir))
+                                  (string-trim
+                                   (with-temp-buffer
+                                     (let ((default-directory org-dir))
+                                       (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+                                       (buffer-string))))
+                                version)))
+            (with-temp-file org-version-file
+              (insert
+               (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+               (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+               "(provide 'org-version)\n"))))
+        (when (and (file-writable-p org-dir)
+                   (not (file-exists-p org-loaddefs-file)))
+          (require 'autoload)
+          (let ((generated-autoload-file org-loaddefs-file)
+                (backup-inhibited t))
+            (make-directory-autoloads org-dir org-loaddefs-file)))))
+
     (setq org-clock-persist-file (concat spacemacs-cache-directory
                                          "org-clock-save.el")
           org-id-locations-file (concat spacemacs-cache-directory
