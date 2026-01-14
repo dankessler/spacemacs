@@ -128,3 +128,6 @@ intelligence to attempt to determine the destination state.")
 
 (defvar org-enable-transclusion-support nil
   "If non-nil the `org-transclusion' package is configured.")
+
+(defvar org-enable-latex-preview-support nil
+  "If non-nil, enable org-latex-preview support (installs org-mode from dev branch).")

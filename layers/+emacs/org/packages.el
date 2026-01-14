@@ -22,7 +22,7 @@
 
 
 (defconst org-packages
-  '(
+  `(
     company
     company-emoji
     emoji-cheat-sheet-plus
@@ -33,7 +33,13 @@
     htmlize
     ;; ob, org, org-agenda and org-contacts are installed by `org-contrib'
     (ob :location built-in)
-    (org :location elpa :min-version "9.6.1")
+    ,(if (bound-and-true-p org-enable-latex-preview-support)
+         '(org :location (recipe :fetcher git
+                                 :url "https://git.tecosaur.net/tec/org-mode.git"
+                                 :branch "dev"
+                                 :files ("lisp/*.el" "lisp/org-*.el" "etc" "doc/*")
+                                 :build (("make" "all" "autoloads"))))
+       '(org :location elpa :min-version "9.6.1"))
     (org-agenda :location built-in)
     (org-wild-notifier
                 :toggle org-enable-notifications)
