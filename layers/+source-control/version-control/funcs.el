@@ -52,12 +52,11 @@
 
 (defun spacemacs/vcs-stage-hunk ()
   (interactive)
-  (if (eq 'diff-hl version-control-diff-tool)
-      (message "Staging not available")
-    (let ((current-prefix-arg t))
-      (call-interactively
-       (cl-case version-control-diff-tool
-         (git-gutter  'git-gutter:stage-hunk))))))
+  (let ((current-prefix-arg t))
+    (call-interactively
+     (cl-case version-control-diff-tool
+       (diff-hl     'diff-hl-stage-hunk)
+       (git-gutter  'git-gutter:stage-hunk)))))
 
 (defun spacemacs/vcs-show-hunk ()
   (interactive)
