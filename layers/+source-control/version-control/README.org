@@ -71,7 +71,7 @@ one over the other:
 |-------------------------------------+---------+------------|
 | Show in fringe                      | X       | X          |
 | Extended VCS support (e.g. hg, svn) | X       | X          |
-| Stage hunks from buffer             |         | X          |
+| Stage hunks from buffer             | X       | X          |
 | Dired support                       | X       |            |
 
 =diff-hl= supports both the margin (TTY frames) and the fringe (GUI
