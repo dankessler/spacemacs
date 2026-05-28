@@ -68,37 +68,31 @@
 
 (defun spacemacs/vcs-enable-margin ()
   (interactive)
-  (let ((current-prefix-arg t))
-    (cl-case version-control-diff-tool
-      (diff-hl
-       (diff-hl-margin-local-mode)
-       (diff-hl-update))
-      (git-gutter  (call-interactively 'git-gutter-mode)))))
+  (cl-case version-control-diff-tool
+    (diff-hl     (diff-hl-mode 1))
+    (git-gutter  (let ((current-prefix-arg t))
+                   (call-interactively 'git-gutter-mode)))))
 
 (defun spacemacs/vcs-disable-margin ()
   (interactive)
-  (let ((current-prefix-arg nil))
-    (cl-case version-control-diff-tool
-      (diff-hl
-       (diff-hl-margin-local-mode -1)
-       (diff-hl-update))
-      (git-gutter  (call-interactively 'git-gutter-mode)))))
+  (cl-case version-control-diff-tool
+    (diff-hl     (diff-hl-mode -1))
+    (git-gutter  (let ((current-prefix-arg nil))
+                   (call-interactively 'git-gutter-mode)))))
 
 (defun spacemacs/vcs-enable-margin-globally ()
   (interactive)
-  (let ((current-prefix-arg t))
-    (call-interactively
-     (cl-case version-control-diff-tool
-       (diff-hl     'diff-hl-margin-mode)
-       (git-gutter  'global-git-gutter-mode)))))
+  (cl-case version-control-diff-tool
+    (diff-hl     (global-diff-hl-mode 1))
+    (git-gutter  (let ((current-prefix-arg t))
+                   (call-interactively 'global-git-gutter-mode)))))
 
 (defun spacemacs/vcs-disable-margin-globally ()
   (interactive)
-  (let ((current-prefix-arg nil))
-    (call-interactively
-     (cl-case version-control-diff-tool
-       (diff-hl     'diff-hl-margin-mode)
-       (git-gutter  'global-git-gutter-mode)))))
+  (cl-case version-control-diff-tool
+    (diff-hl     (global-diff-hl-mode -1))
+    (git-gutter  (let ((current-prefix-arg nil))
+                   (call-interactively 'global-git-gutter-mode)))))
 
 (defun spacemacs/vcs-show-help ()
   (interactive)
@@ -108,27 +102,27 @@
 (defun spacemacs/vcs-margin-p ()
   (interactive)
   (cl-case version-control-diff-tool
-    (diff-hl     (bound-and-true-p diff-hl-margin-local-mode))
+    (diff-hl     (bound-and-true-p diff-hl-mode))
     (git-gutter  (bound-and-true-p git-gutter-mode))))
 
 (defun spacemacs/vcs-margin-global-p ()
   (interactive)
   (cl-case version-control-diff-tool
-    (diff-hl     diff-hl-margin-mode)
+    (diff-hl     (bound-and-true-p global-diff-hl-mode))
     (git-gutter  global-git-gutter-mode)))
 
 (spacemacs|add-toggle version-control-margin
   :status (spacemacs/vcs-margin-p)
   :on (spacemacs/vcs-enable-margin)
   :off (spacemacs/vcs-disable-margin)
-  :documentation "Enable diff margins."
+  :documentation "Enable diff indicators."
   :evil-leader "Td")
 
 (spacemacs|add-toggle version-control-margin-globally
   :status (spacemacs/vcs-margin-global-p)
   :on (spacemacs/vcs-enable-margin-globally)
   :off (spacemacs/vcs-disable-margin-globally)
-  :documentation "Enable diff margins globally."
+  :documentation "Enable diff indicators globally."
   :evil-leader "T C-d")
 
 (defun spacemacs//smerge-ts-hint ()
